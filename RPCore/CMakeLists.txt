@@ -57,6 +57,8 @@ if(MSVC)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PHYSX_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC Vulkan::Vulkan)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC glm)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC glfw)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC PHYSX_LIBRARY)
