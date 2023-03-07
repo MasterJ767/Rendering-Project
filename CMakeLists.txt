@@ -66,5 +66,6 @@ add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}")
 # Sub-projects
 ################################################################################
 add_subdirectory(RPCore)
+add_subdirectory(ZenithCore)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT RPCore)

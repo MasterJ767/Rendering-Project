@@ -1,12 +1,12 @@
-set(PROJECT_NAME RPCore)
+set(PROJECT_NAME ZenithCore)
 
 set(Header_Files
-
+	"Window.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
-    "Main.cpp"
+    "Window.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
@@ -55,8 +55,6 @@ if(MSVC)
         >
     )
 endif()
-
-include_directories("../ZenithCore/")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})
