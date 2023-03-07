@@ -56,7 +56,13 @@ if(MSVC)
     )
 endif()
 
+if(MSVC)
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC  "Winmm.lib")
+endif()
+
 include_directories("../ZenithCore/")
+
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithCore)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})

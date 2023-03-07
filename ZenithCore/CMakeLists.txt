@@ -1,6 +1,7 @@
 set(PROJECT_NAME ZenithCore)
 
 set(Header_Files
+    "App.h"
 	"Window.h"
 )
 source_group("Header Files" FILES ${Header_Files})
@@ -15,10 +16,12 @@ set(ALL_FILES
     ${Source_Files}
 )
 
-add_executable(${PROJECT_NAME}  ${ALL_FILES})
+set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
+
+add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
-set(ROOT_NAMESPACE RPCore)
+set(ROOT_NAMESPACE ZenithCore)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_GLOBAL_KEYWORD "Win32Proj"
@@ -27,34 +30,33 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
 )
 
-if(MSVC)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        "UNICODE;"
-        "_UNICODE" 
-    )
-endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+	"UNICODE;"
+	"_UNICODE" 
+)
 
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        $<$<CONFIG:Release>:
-            /Oi;
-            /Gy
-        >
-        /permissive-;
-        /std:c++latest;
-        /sdl;
-        /W3;
-        ${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT};
-        ${DEFAULT_CXX_EXCEPTION_HANDLING};
-        /Y-
-    )
-    target_link_options(${PROJECT_NAME} PRIVATE
-        $<$<CONFIG:Release>:
-            /OPT:REF;
-            /OPT:ICF
-        >
-    )
-endif()
+
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+	$<$<CONFIG:Release>:
+		/Oi;
+		/Gy
+	>
+	/permissive-;
+	/std:c++latest;
+	/sdl;
+	/W3;
+	${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT};
+	${DEFAULT_CXX_EXCEPTION_HANDLING};
+	/Y-
+)
+target_link_options(${PROJECT_NAME} PRIVATE
+	$<$<CONFIG:Release>:
+		/OPT:REF;
+		/OPT:ICF
+	>
+)
+
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})
