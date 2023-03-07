@@ -54,12 +54,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
-find_library(PHYSX_LIBRARY PhysX HINTS "${PROJECT_SOURCE_DIR}/physx")
-find_path(PHYSX_INCLUDE_DIR PxPhysicsAPI.h HINTS "${PROJECT_SOURCE_DIR}/physx/include")
-
 find_package(Vulkan REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(physx CONFIG REQUIRED)
 
 set(ASSET_ROOT "${CMAKE_SOURCE_DIR}/Assets/" CACHE STRING "" FORCE)
 add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}") 
