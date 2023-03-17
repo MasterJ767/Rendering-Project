@@ -60,13 +60,6 @@ foreach (file ${SHADER_FILES})
             DEPENDS ${file}
 			VERBATIM
 		)
-		
-		message(${file})
-		message(${file_name})
-		message(${file_dir})
-		message(${SPIRV_ABS_INPUT})
-		message(${SPIRV_ABS_OUTPUT})
-		message(${SPIRV_OUTPUT})
         list(APPEND SPIRV_BINARY_FILES ${SPIRV_OUTPUT})   
 	endif()
 endforeach()

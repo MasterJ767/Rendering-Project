@@ -6,6 +6,7 @@ set(PROJECT_NAME ZenithCore)
 set(Header_Files
     "App.h"
 	"Assets.h"
+	"Device.h"
 	"Pipeline.h"
 	"Window.h"
 )
@@ -13,6 +14,7 @@ source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
 	"App.cpp"
+	"Device.cpp"
 	"Pipeline.cpp"
     "Window.cpp"
 )

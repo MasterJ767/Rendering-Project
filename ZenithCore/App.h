@@ -12,7 +12,8 @@ namespace Zenith {
 			void run();
 		private:
 			Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
-			Pipeline pipeline{ "simple_shader.vert.spv", "simple_shader.frag.spv"};
+			Device device{ window };
+			Pipeline pipeline{device,  "simple_shader.vert.spv", "simple_shader.frag.spv", Pipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
 		};
 	}
 }

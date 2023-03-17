@@ -1,5 +1,7 @@
 #include "Window.h"
 
+#include <stdexcept>
+
 using namespace Zenith::Core;
 
 Window::Window(int w, int h, std::string name) : width{ w }, height{ h }, windowName{ name } {
@@ -21,4 +23,10 @@ void Window::initWindow() {
 
 bool Window::shouldClose() {
 	return glfwWindowShouldClose(window);
+}
+
+void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
+	if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create window surface");
+	}
 }
