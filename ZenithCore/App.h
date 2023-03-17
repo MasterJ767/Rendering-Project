@@ -1,5 +1,6 @@
 #pragma once
 #include "Window.h"
+#include "Pipeline.h"
 
 namespace Zenith {
 	namespace Core {
@@ -11,6 +12,7 @@ namespace Zenith {
 			void run();
 		private:
 			Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
+			Pipeline pipeline{ "simple_shader.vert.spv", "simple_shader.frag.spv"};
 		};
 	}
 }

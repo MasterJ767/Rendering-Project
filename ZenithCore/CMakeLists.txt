@@ -1,12 +1,19 @@
 set(PROJECT_NAME ZenithCore)
 
+################################################################################
+# Source groups
+################################################################################
 set(Header_Files
     "App.h"
+	"Assets.h"
+	"Pipeline.h"
 	"Window.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
+	"App.cpp"
+	"Pipeline.cpp"
     "Window.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
@@ -18,6 +25,9 @@ set(ALL_FILES
 
 set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
 
+################################################################################
+# Target
+################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
@@ -30,13 +40,17 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
 )
 
+################################################################################
+# Compile definitions
+################################################################################
 target_compile_definitions(${PROJECT_NAME} PRIVATE
 	"UNICODE;"
 	"_UNICODE" 
 )
 
-
-
+################################################################################
+# Compile and link options
+################################################################################
 target_compile_options(${PROJECT_NAME} PRIVATE
 	$<$<CONFIG:Release>:
 		/Oi;
@@ -57,7 +71,9 @@ target_link_options(${PROJECT_NAME} PRIVATE
 	>
 )
 
-
+################################################################################
+# Dependencies
+################################################################################
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PHYSX_INCLUDE_DIRS})

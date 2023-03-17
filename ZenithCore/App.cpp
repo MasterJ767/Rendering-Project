@@ -3,7 +3,7 @@
 using namespace Zenith::Core;
 
 void App::run() {
-	while (window.shouldClose()) {
+	while (!window.shouldClose()) {
 		glfwPollEvents();
 	}
 }
