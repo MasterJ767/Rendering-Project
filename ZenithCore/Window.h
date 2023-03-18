@@ -16,6 +16,7 @@ namespace Zenith {
 			Window& operator=(const Window&) = delete;
 
 			bool shouldClose();
+			VkExtent2D getExtent();
 
 			void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 		private:

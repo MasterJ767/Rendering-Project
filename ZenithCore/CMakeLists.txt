@@ -9,6 +9,7 @@ set(Header_Files
 	"Device.h"
 	"Pipeline.h"
 	"Window.h"
+	"SwapChain.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -17,6 +18,7 @@ set(Source_Files
 	"Device.cpp"
 	"Pipeline.cpp"
     "Window.cpp"
+	"SwapChain.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
