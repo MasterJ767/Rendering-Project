@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Pipeline.h"
 #include "SwapChain.h"
+#include "Model.h"
 
 #include <memory>
 #include <vector>
@@ -21,6 +22,7 @@ namespace Zenith {
 
 			void run();
 		private:
+			void loadModels();
 			void createPipelineLayout();
 			void createPipeline();
 			void createCommandBuffers();
@@ -32,6 +34,7 @@ namespace Zenith {
 			std::unique_ptr<Pipeline> pipeline;
 			VkPipelineLayout pipelineLayout;
 			std::vector<VkCommandBuffer> commandBuffers;
+			std::unique_ptr<Model> model;
 		};
 	}
 }
