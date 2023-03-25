@@ -14,8 +14,7 @@ using namespace Zenith::Components;
 namespace Zenith {
 	namespace Components {
 		struct SimplePushConstantData {
-			glm::mat2 transform{ 1.0f };
-			glm::vec2 offset;
+			glm::mat4 transform{ 1.0f };
 			alignas(16) glm::vec3 colour;
 		};
 	}
@@ -61,12 +60,12 @@ void SimpleRenderSystem::renderObjectRenderers(VkCommandBuffer commandBuffer, st
 	pipeline->bind(commandBuffer);
 
 	for (auto& obj : objectRenderers) {
-		SimplePushConstantData push{};
-		obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.001f, glm::two_pi<float>());
+		obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + 0.001f, glm::two_pi<float>());
+		obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + 0.0005f, glm::two_pi<float>());
 
-		push.offset = obj.transform2d.translation;
+		SimplePushConstantData push{};
 		push.colour = obj.colour;
-		push.transform = obj.transform2d.mat2();
+		push.transform = obj.transform.mat4();
 
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 		obj.model->bind(commandBuffer);
