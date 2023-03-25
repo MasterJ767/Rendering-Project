@@ -3,6 +3,7 @@
 #include "Pipeline.h"
 #include "SwapChain.h"
 #include "Model.h"
+#include "ObjectRenderer.h"
 
 #include <memory>
 #include <vector>
@@ -22,7 +23,7 @@ namespace Zenith {
 
 			void run();
 		private:
-			void loadModels();
+			void loadObjectRenderers();
 			void createPipelineLayout();
 			void createPipeline();
 			void createCommandBuffers();
@@ -30,6 +31,7 @@ namespace Zenith {
 			void drawFrame();
 			void recreateSwapChain();
 			void recordCommandBuffer(int imageIndex);
+			void renderObjectRenderers(VkCommandBuffer commandBuffer);
 
 			Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
 			Device device{ window };
@@ -37,7 +39,7 @@ namespace Zenith {
 			std::unique_ptr<Pipeline> pipeline;
 			VkPipelineLayout pipelineLayout;
 			std::vector<VkCommandBuffer> commandBuffers;
-			std::unique_ptr<Model> model;
+			std::vector<ObjectRenderer> objectRenderers;
 		};
 	}
 }

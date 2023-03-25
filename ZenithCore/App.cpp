@@ -1,12 +1,27 @@
 #include "App.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
 #include <stdexcept>
 #include <array>
 
 using namespace Zenith::Core;
 
+namespace Zenith {
+	namespace Core {
+		struct SimplePushConstantData {
+			glm::mat2 transform{ 1.0f };
+			glm::vec2 offset;
+			alignas(16) glm::vec3 colour;
+		};
+	}
+}
+
 App::App() {
-	loadModels();
+	loadObjectRenderers();
 	createPipelineLayout();
 	recreateSwapChain();
 	createCommandBuffers();
@@ -25,23 +40,37 @@ void App::run() {
 	vkDeviceWaitIdle(device.device());
 }
 
-void App::loadModels() {
+void App::loadObjectRenderers() {
 	std::vector<Model::Vertex> vertices{
 		{ {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f} },
 		{ {0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
 		{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} }
 	};
 
-	model = std::make_unique<Model>(device, vertices);
+	auto model = std::make_shared<Model>(device, vertices);
+
+	auto triangle = ObjectRenderer::createObjectRenderer();
+	triangle.model = model;
+	triangle.colour = { 0.1f, 0.8f, 0.1f };
+	triangle.transform2d.translation.x = 0.2f;
+	triangle.transform2d.scale = { 2.0f, 0.5f };
+	triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+
+	objectRenderers.push_back(std::move(triangle));
 }
 
 void App::createPipelineLayout() {
+	VkPushConstantRange pushConstantRange{};
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT || VK_SHADER_STAGE_FRAGMENT_BIT;
+	pushConstantRange.offset = 0;
+	pushConstantRange.size = sizeof(SimplePushConstantData);
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 0;
 	pipelineLayoutInfo.pSetLayouts = nullptr;
-	pipelineLayoutInfo.pushConstantRangeCount = 0;
-	pipelineLayoutInfo.pPushConstantRanges = nullptr;
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 	if (vkCreatePipelineLayout(device.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
@@ -117,7 +146,7 @@ void App::recordCommandBuffer(int imageIndex) {
 	renderPassInfo.renderArea.extent = swapChain->getSwapChainExtent();
 
 	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+	clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
 	clearValues[1].depthStencil = { 1.0f, 0 };
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
@@ -135,13 +164,28 @@ void App::recordCommandBuffer(int imageIndex) {
 	vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-	pipeline->bind(commandBuffers[imageIndex]);
-	model->bind(commandBuffers[imageIndex]);
-	model->draw(commandBuffers[imageIndex]);
+	renderObjectRenderers(commandBuffers[imageIndex]);
 
 	vkCmdEndRenderPass(commandBuffers[imageIndex]);
 	if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
+void App::renderObjectRenderers(VkCommandBuffer commandBuffer) {
+	pipeline->bind(commandBuffer);
+
+	for (auto& obj : objectRenderers) {
+		SimplePushConstantData push{};
+		obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.001f, glm::two_pi<float>());
+
+		push.offset = obj.transform2d.translation;
+		push.colour = obj.colour;
+		push.transform = obj.transform2d.mat2();
+
+		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+		obj.model->bind(commandBuffer);
+		obj.model->draw(commandBuffer);
 	}
 }
 
