@@ -1,7 +1,6 @@
 #pragma once
 #include "Window.h"
-#include "Pipeline.h"
-#include "SwapChain.h"
+#include "Renderer.h"
 #include "Model.h"
 #include "ObjectRenderer.h"
 
@@ -26,21 +25,11 @@ namespace Zenith {
 			void run();
 		private:
 			void loadObjectRenderers();
-			void createPipelineLayout();
-			void createPipeline();
-			void createCommandBuffers();
-			void freeCommandBuffers();
-			void drawFrame();
-			void recreateSwapChain();
-			void recordCommandBuffer(int imageIndex);
-			void renderObjectRenderers(VkCommandBuffer commandBuffer);
 
 			Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
 			Device device{ window };
-			std::unique_ptr<SwapChain> swapChain;
-			std::unique_ptr<Pipeline> pipeline;
-			VkPipelineLayout pipelineLayout;
-			std::vector<VkCommandBuffer> commandBuffers;
+			Renderer renderer{ window, device };
+
 			std::vector<ObjectRenderer> objectRenderers;
 		};
 	}
