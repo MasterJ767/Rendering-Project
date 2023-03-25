@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Camera.h"
 #include "SimpleRenderSystem.h"
 
 #define GLM_FORCE_RADIANS
@@ -22,13 +23,19 @@ App::~App() {
 
 void App::run() {
 	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass() };
+    Camera camera{};
+    //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
+    camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
 	while (!window.shouldClose()) {
 		glfwPollEvents();
+
+        float aspect = renderer.getAspectRatio();
+        camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 10.0f);
 		
 		if (auto commandBuffer = renderer.beginFrame()) {
 			renderer.beginSwapChainRenderPass(commandBuffer);
-			simpleRenderSystem.renderObjectRenderers(commandBuffer, objectRenderers);
+			simpleRenderSystem.renderObjectRenderers(commandBuffer, objectRenderers, camera);
 			renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
@@ -100,7 +107,7 @@ void App::loadObjectRenderers() {
 
     auto cube = ObjectRenderer::createObjectRenderer();
     cube.model = model;
-    cube.transform.translation = { 0.0f, 0.0f, 0.5f };
+    cube.transform.translation = { 0.0f, 0.0f, 2.5f };
     cube.transform.scale = { 0.5f, 0.5f, 0.5f };
     objectRenderers.push_back(std::move(cube));
 }

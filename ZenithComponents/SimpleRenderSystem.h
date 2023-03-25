@@ -1,4 +1,5 @@
 #pragma once
+#include "Camera.h"
 #include "Pipeline.h"
 #include "Model.h"
 #include "ObjectRenderer.h"
@@ -18,7 +19,7 @@ namespace Zenith {
 			SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 			SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 #
-			void renderObjectRenderers(VkCommandBuffer commandBuffer, std::vector<ObjectRenderer>& objectRenderers);
+			void renderObjectRenderers(VkCommandBuffer commandBuffer, std::vector<ObjectRenderer>& objectRenderers, const Camera& camera);
 
 		private:
 			void createPipelineLayout();
