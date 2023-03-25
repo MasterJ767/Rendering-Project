@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Camera.h"
 #include "SimpleRenderSystem.h"
+#include "KeyboardMovement.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -9,9 +10,11 @@
 
 #include <stdexcept>
 #include <array>
+#include <chrono>
 
 using namespace Zenith::Core;
 using namespace Zenith::Components;
+using namespace Zenith::Logic;
 
 App::App() {
 	loadObjectRenderers();
@@ -27,8 +30,20 @@ void App::run() {
     //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
     camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
+    auto viewerObject = ObjectRenderer::createObjectRenderer();
+    KeyboardMovement cameraController{};
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+
 	while (!window.shouldClose()) {
 		glfwPollEvents();
+
+        auto newTime = std::chrono::high_resolution_clock::now();
+        float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+        currentTime = newTime;
+
+        cameraController.moveInPlaneXZ(window.getGLFWWindow(), frameTime, viewerObject);
+        camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
         float aspect = renderer.getAspectRatio();
         camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 10.0f);
