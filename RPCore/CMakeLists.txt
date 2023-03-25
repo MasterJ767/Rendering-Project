@@ -144,8 +144,10 @@ if(MSVC)
 endif()
 
 include_directories("../ZenithCore/")
+include_directories("../ZenithComponents/")
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithCore)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithComponents)
 
 add_custom_target(SHADER_FILES DEPENDS ON ${SPIRV_BINARY_FILES})
 

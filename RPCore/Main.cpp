@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace Zenith::Core;
+using namespace Zenith::Components;
 
 int main() {
     App app{};

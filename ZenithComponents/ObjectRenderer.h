@@ -5,7 +5,9 @@
 #include <memory>
 
 namespace Zenith {
-	namespace Core {
+	using namespace Core;
+
+	namespace Components {
 		struct Transform2dComponent {
 			glm::vec2 translation{};
 			glm::vec2 scale{ 1.0f, 1.0f };

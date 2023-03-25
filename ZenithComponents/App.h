@@ -9,7 +9,9 @@
 #include <vector>
 
 namespace Zenith {
-	namespace Core {
+	using namespace Core;
+
+	namespace Components {
 		class App {
 		public:
 			static constexpr int WIDTH = 800;

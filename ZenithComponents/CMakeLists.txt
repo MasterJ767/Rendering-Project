@@ -1,24 +1,17 @@
-set(PROJECT_NAME ZenithCore)
+set(PROJECT_NAME ZenithComponents)
 
 ################################################################################
 # Source groups
 ################################################################################
 set(Header_Files
-	"Assets.h"
-	"Device.h"
-	"Model.h"
-	"Pipeline.h"
-	"SwapChain.h"
-	"Window.h"
+    "App.h"
+	"ObjectRenderer.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
-	"Device.cpp"
-	"Model.cpp"
-	"Pipeline.cpp"
-	"SwapChain.cpp"
-    "Window.cpp"
+	"App.cpp"
+	"ObjectRenderer.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
@@ -35,7 +28,7 @@ set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
-set(ROOT_NAMESPACE ZenithCore)
+set(ROOT_NAMESPACE ZenithComponents)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_GLOBAL_KEYWORD "Win32Proj"
@@ -78,6 +71,10 @@ target_link_options(${PROJECT_NAME} PRIVATE
 ################################################################################
 # Dependencies
 ################################################################################
+include_directories("../ZenithCore/")
+
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithCore)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PHYSX_INCLUDE_DIRS})

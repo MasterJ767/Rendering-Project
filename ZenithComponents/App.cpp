@@ -9,9 +9,10 @@
 #include <array>
 
 using namespace Zenith::Core;
+using namespace Zenith::Components;
 
 namespace Zenith {
-	namespace Core {
+	namespace Components {
 		struct SimplePushConstantData {
 			glm::mat2 transform{ 1.0f };
 			glm::vec2 offset;
