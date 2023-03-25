@@ -17,13 +17,17 @@ namespace Zenith {
 
 			bool shouldClose();
 			VkExtent2D getExtent();
+			bool wasWindowResized() { return framebufferResized; }
+			void resetWindowResizedFlag() { framebufferResized = false; }
 
 			void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 		private:
+			static void framebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height);
 			void initWindow();
 
-			const int width;
-			const int height;
+			int width;
+			int height;
+			bool framebufferResized = false;
 
 			std::string windowName;
 			GLFWwindow* window;
