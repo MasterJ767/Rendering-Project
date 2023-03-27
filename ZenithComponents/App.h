@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "Renderer.h"
 #include "Model.h"
-#include "ObjectRenderer.h"
+#include "GameObject.h"
 
 #include <memory>
 #include <vector>
@@ -24,13 +24,13 @@ namespace Zenith {
 
 			void run();
 		private:
-			void loadObjectRenderers();
+			void loadGameObjects();
 
 			Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
 			Device device{ window };
 			Renderer renderer{ window, device };
 
-			std::vector<ObjectRenderer> objectRenderers;
+			std::vector<GameObject> gameObjects;
 		};
 	}
 }

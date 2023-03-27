@@ -15,7 +15,7 @@ namespace Zenith {
 	namespace Components {
 		struct SimplePushConstantData {
 			glm::mat4 transform{ 1.0f };
-			alignas(16) glm::vec3 colour;
+			glm::mat4 normalMatrix{ 1.0f };
 		};
 	}
 }
@@ -56,15 +56,16 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
 	pipeline = std::make_unique<Pipeline>(device, "simple_shader.vert.spv", "simple_shader.frag.spv", pipelineConfig);
 }
 
-void SimpleRenderSystem::renderObjectRenderers(VkCommandBuffer commandBuffer, std::vector<ObjectRenderer>& objectRenderers, const Camera& camera) {
+void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera) {
 	pipeline->bind(commandBuffer);
 
 	auto projectionView = camera.getProjection() * camera.getView();
 
-	for (auto& obj : objectRenderers) {
+	for (auto& obj : gameObjects) {
 		SimplePushConstantData push{};
-		push.colour = obj.colour;
-		push.transform = projectionView * obj.transform.mat4();
+		auto modelMatrix = obj.transform.mat4();
+		push.transform = projectionView * modelMatrix;
+		push.normalMatrix = obj.transform.normalMatrix();
 
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 		obj.model->bind(commandBuffer);

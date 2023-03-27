@@ -6,8 +6,8 @@ set(PROJECT_NAME ZenithComponents)
 set(Header_Files
     "App.h"
 	"Camera.h"
+	"GameObject.h"
 	"KeyboardMovement.h"
-	"ObjectRenderer.h"
 	"Renderer.h"
 )
 source_group("Header Files" FILES ${Header_Files})
@@ -21,8 +21,8 @@ source_group("Render Systems" FILES ${Render_System_Files})
 set(Source_Files
 	"App.cpp"
 	"Camera.cpp"
+	"GameObject.cpp"
 	"KeyboardMovement.cpp"
-	"ObjectRenderer.cpp"
 	"Renderer.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})

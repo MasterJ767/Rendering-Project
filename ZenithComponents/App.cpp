@@ -17,7 +17,7 @@ using namespace Zenith::Components;
 using namespace Zenith::Logic;
 
 App::App() {
-	loadObjectRenderers();
+	loadGameObjects();
 }
 
 App::~App() {
@@ -30,7 +30,7 @@ void App::run() {
     //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
     camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
-    auto viewerObject = ObjectRenderer::createObjectRenderer();
+    auto viewerObject = GameObject::createGameObject();
     KeyboardMovement cameraController{};
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -50,7 +50,7 @@ void App::run() {
 		
 		if (auto commandBuffer = renderer.beginFrame()) {
 			renderer.beginSwapChainRenderPass(commandBuffer);
-			simpleRenderSystem.renderObjectRenderers(commandBuffer, objectRenderers, camera);
+			simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
 			renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
@@ -59,12 +59,12 @@ void App::run() {
 	vkDeviceWaitIdle(device.device());
 }
 
-void App::loadObjectRenderers() {
-    std::shared_ptr<Model> model = Model::createModelFromFile(device, "smooth_vase.obj");
+void App::loadGameObjects() {
+    std::shared_ptr<Model> model = Model::createModelFromFile(device, "flat_vase.obj");
 
-    auto objectRenderer = ObjectRenderer::createObjectRenderer();
-    objectRenderer.model = model;
-    objectRenderer.transform.translation = { 0.0f, 0.0f, 2.5f };
-    objectRenderer.transform.scale = glm::vec3(3.0f);
-    objectRenderers.push_back(std::move(objectRenderer));
+    auto gameObject = GameObject::createGameObject();
+    gameObject.model = model;
+    gameObject.transform.translation = { 0.0f, 0.5f, 2.5f };
+    gameObject.transform.scale = glm::vec3(3.0f);
+    gameObjects.push_back(std::move(gameObject));
 }

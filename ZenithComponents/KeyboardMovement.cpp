@@ -3,7 +3,7 @@
 using namespace Zenith::Components;
 using namespace Zenith::Logic;
 
-void KeyboardMovement::moveInPlaneXZ(GLFWwindow* window, float dt, ObjectRenderer& objectRenderer) {
+void KeyboardMovement::moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject) {
 	glm::vec3 rotate{ 0.0f };
 	if (glfwGetKey(window, keys.lookRight) == GLFW_PRESS) rotate.y += 1.0f;
 	if (glfwGetKey(window, keys.lookLeft) == GLFW_PRESS) rotate.y -= 1.0f;
@@ -11,13 +11,13 @@ void KeyboardMovement::moveInPlaneXZ(GLFWwindow* window, float dt, ObjectRendere
 	if (glfwGetKey(window, keys.lookDown) == GLFW_PRESS) rotate.x -= 1.0f;
 
 	if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
-		objectRenderer.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
+		gameObject.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
 	}
 
-	objectRenderer.transform.rotation.x = glm::clamp(objectRenderer.transform.rotation.x, -1.5f, 1.5f);
-	objectRenderer.transform.rotation.y = glm::mod(objectRenderer.transform.rotation.y, glm::two_pi<float>());
+	gameObject.transform.rotation.x = glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);
+	gameObject.transform.rotation.y = glm::mod(gameObject.transform.rotation.y, glm::two_pi<float>());
 
-	float yaw = objectRenderer.transform.rotation.y;
+	float yaw = gameObject.transform.rotation.y;
 	const glm::vec3 forwardDir{ sin(yaw), 0.0f, cos(yaw) };
 	const glm::vec3 rightDir{ forwardDir.z, 0.0f, -forwardDir.x };
 	const glm::vec3 upDir{ 0.0f, -1.0f, 0.0f };
@@ -31,6 +31,6 @@ void KeyboardMovement::moveInPlaneXZ(GLFWwindow* window, float dt, ObjectRendere
 	if (glfwGetKey(window, keys.moveDown) == GLFW_PRESS) moveDir -= upDir;
 
 	if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
-		objectRenderer.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
+		gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
 	}
 }

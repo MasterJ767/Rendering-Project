@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ObjectRenderer.h"
+#include "GameObject.h"
 #include "Window.h"
 
 namespace Zenith {
@@ -23,7 +23,7 @@ namespace Zenith {
 				int lookDown = GLFW_KEY_DOWN;
 			};
 
-			void moveInPlaneXZ(GLFWwindow* window, float dt, ObjectRenderer& objectRenderer);
+			void moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
 
 			KeyMappings keys{};
 			float moveSpeed{ 3.0f };
