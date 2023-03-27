@@ -1,6 +1,29 @@
 #include "Model.h"
+#include "Utils.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tinyobjectloader/tiny_obj_loader.h>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
+#include <iostream>
+#include <cassert>
+#include <cstring>
+#include <unordered_map>
 
 using namespace Zenith::Core;
+
+namespace std {
+	template <>
+	struct hash<Model::Vertex> {
+		size_t operator()(Model::Vertex const& vertex) const {
+			size_t seed = 0;
+			Zenith::Util::hashCombine(seed, vertex.position, vertex.colour, vertex.normal, vertex.uv);
+			return seed;
+		}
+	};
+}
 
 Model::Model(Device& device, const Model::Builder& builder) : device{ device } {
 	createVertexBuffers(builder.vertices);
@@ -15,6 +38,14 @@ Model::~Model() {
 		vkDestroyBuffer(device.device(), indexBuffer, nullptr);
 		vkFreeMemory(device.device(), indexBufferMemory, nullptr);
 	}
+}
+
+std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::string& filepath) {
+	Builder builder{};
+	builder.loadModel(Util::MODELDIR + filepath);
+	std::cout << "Vertex Count: " << builder.vertices.size();
+
+	return std::make_unique<Model>(device, builder);
 }
 
 void Model::createVertexBuffers(const std::vector<Vertex>& vertices) {
@@ -105,4 +136,68 @@ std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescri
 	attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 	attributeDescriptions[1].offset = offsetof(Vertex, colour);
 	return attributeDescriptions;
+}
+
+void Model::Builder::loadModel(const std::string& filepath) {
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string warn, err;
+
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
+		throw std::runtime_error(warn + err);
+	}
+
+	vertices.clear();
+	indices.clear();
+
+	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+	for (const auto& shape : shapes) {
+		for (const auto& index : shape.mesh.indices) {
+			Vertex vertex{};
+
+			if (index.vertex_index >= 0) {
+				vertex.position = {
+					attrib.vertices[3 * index.vertex_index + 0],
+					attrib.vertices[3 * index.vertex_index + 1],
+					attrib.vertices[3 * index.vertex_index + 2]
+				};
+
+				auto colorIndex = 3 * index.vertex_index + 2;
+				if (colorIndex < attrib.colors.size()) {
+					vertex.colour = {
+					attrib.colors[colorIndex - 2],
+					attrib.colors[colorIndex - 1],
+					attrib.colors[colorIndex - 0]
+					};
+				}
+				else {
+					vertex.colour = { 1.0f, 1.0f, 1.0f };
+				}
+			}
+
+			if (index.normal_index >= 0) {
+				vertex.normal = {
+					attrib.normals[3 * index.normal_index + 0],
+					attrib.normals[3 * index.normal_index + 1],
+					attrib.normals[3 * index.normal_index + 2]
+				};
+			}
+
+
+			if (index.texcoord_index >= 0) {
+				vertex.uv = {
+					attrib.texcoords[2 * index.texcoord_index + 0],
+					attrib.texcoords[2 * index.texcoord_index + 1]
+				};
+			}
+
+			if (uniqueVertices.count(vertex) == 0) {
+				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+				vertices.push_back(vertex);
+			}
+			indices.push_back(uniqueVertices[vertex]);
+		}
+	}
 }

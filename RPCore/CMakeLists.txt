@@ -143,9 +143,11 @@ if(MSVC)
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC  "Winmm.lib")
 endif()
 
+include_directories("../External/")
 include_directories("../ZenithCore/")
 include_directories("../ZenithComponents/")
 
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC External)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithCore)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ZenithComponents)
 

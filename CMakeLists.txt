@@ -47,6 +47,10 @@ include(CMake/Utils.cmake)
 ################################################################################
 include(CMake/GlobalSettingsInclude.cmake OPTIONAL)
 
+set(glm_DIR "${PROJECT_SOURCE_DIR}/glm/lib/cmake/glm" CACHE STRING "" FORCE)
+set(glfw3_DIR "${PROJECT_SOURCE_DIR}/GLFW/lib/cmake/glfw3" CACHE STRING "" FORCE)
+set(physx_DIR "${PROJECT_SOURCE_DIR}/physx/lib/cmake/physx" CACHE STRING "" FORCE)
+
 ################################################################################
 # Use solution folders feature
 ################################################################################
@@ -68,5 +72,6 @@ add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}")
 add_subdirectory(RPCore)
 add_subdirectory(ZenithComponents)
 add_subdirectory(ZenithCore)
+add_subdirectory(External)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT RPCore)
