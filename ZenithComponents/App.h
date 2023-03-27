@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Model.h"
 #include "GameObject.h"
+#include "Descriptor.h"
 
 #include <memory>
 #include <vector>
@@ -30,6 +31,7 @@ namespace Zenith {
 			Device device{ window };
 			Renderer renderer{ window, device };
 
+			std::unique_ptr<DescriptorPool> globalPool{};
 			std::vector<GameObject> gameObjects;
 		};
 	}
