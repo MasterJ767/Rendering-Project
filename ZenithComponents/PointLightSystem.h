@@ -12,14 +12,15 @@ namespace Zenith {
 	using namespace Core;
 
 	namespace Components {
-		class SimpleRenderSystem {
+		class PointLightSystem {
 		public:
-			SimpleRenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-			~SimpleRenderSystem();
+			PointLightSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+			~PointLightSystem();
 
-			SimpleRenderSystem(const SimpleRenderSystem&) = delete;
-			SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
+			PointLightSystem(const PointLightSystem&) = delete;
+			PointLightSystem& operator=(const PointLightSystem&) = delete;
 #
+			void update(FrameInfo& frameInfo, GlobalUbo& ubo);
 			void render(FrameInfo& frameInfo);
 
 		private:

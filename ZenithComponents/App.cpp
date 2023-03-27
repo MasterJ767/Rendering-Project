@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Buffer.h"
 #include "SimpleRenderSystem.h"
+#include "PointLightSystem.h"
 #include "KeyboardMovement.h"
 
 #define GLM_FORCE_RADIANS
@@ -16,15 +17,6 @@
 using namespace Zenith::Core;
 using namespace Zenith::Components;
 using namespace Zenith::Logic;
-
-namespace Zenith::Components {
-    struct GlobalUbo {
-        alignas(16) glm::mat4 projectionView{ 1.0f };
-        alignas(16) glm::vec4 ambientLightColour{ 1.0f, 1.0f, 1.0f, 0.02f };
-        alignas(16) glm::vec3 lightPosition{ -1.0f };
-        alignas(16) glm::vec4 lightColor{ 1.0f };
-    };
-}
 
 App::App() {
     globalPool = DescriptorPool::Builder(device)
@@ -57,7 +49,8 @@ void App::run() {
             .build(globalDescriptorSets[i]);
     }
 
-	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+    PointLightSystem pointLightSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
     Camera camera{};
 
     auto viewerObject = GameObject::createGameObject();
@@ -84,12 +77,15 @@ void App::run() {
             FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects};
 
             GlobalUbo ubo{};
-            ubo.projectionView = camera.getProjection() * camera.getView();
+            ubo.projectionMatrix = camera.getProjection();
+            ubo.viewMatrix = camera.getView();
+            pointLightSystem.update(frameInfo, ubo);
             uboBuffers[frameIndex]->writeToBuffer(&ubo);
             uboBuffers[frameIndex]->flush();
 
 			renderer.beginSwapChainRenderPass(commandBuffer);
-			simpleRenderSystem.renderGameObjects(frameInfo);
+			simpleRenderSystem.render(frameInfo);
+            pointLightSystem.render(frameInfo);
 			renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
@@ -120,4 +116,21 @@ void App::loadGameObjects() {
     gameObject3.transform.translation = { 0.0f, 0.5f, 0.0f };
     gameObject3.transform.scale = glm::vec3(3.0f);
     gameObjects.emplace(gameObject3.getId(), std::move(gameObject3));
+
+    std::vector<glm::vec3> lightColours{
+      {1.f, .1f, .1f},
+      {.1f, .1f, 1.f},
+      {.1f, 1.f, .1f},
+      {1.f, 1.f, .1f},
+      {.1f, 1.f, 1.f},
+      {1.f, 1.f, 1.f}
+    };
+
+    for (int i = 0; i < lightColours.size(); ++i) {
+        auto pointLight = GameObject::makePointLight(0.2f);
+        pointLight.colour = lightColours[i];
+        auto rotateLight = glm::rotate(glm::mat4(1.0f), (i * glm::two_pi<float>()) / lightColours.size(), { 0.0f, -1.0f, 0.0f });
+        pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+        gameObjects.emplace(pointLight.getId(), std::move(pointLight));
+    }
 }

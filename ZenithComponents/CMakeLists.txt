@@ -14,6 +14,8 @@ set(Header_Files
 source_group("Header Files" FILES ${Header_Files})
 
 set(Render_System_Files
+	"PointLightSystem.h"
+	"PointLightSystem.cpp"
 	"SimpleRenderSystem.h"
 	"SimpleRenderSystem.cpp"
 )

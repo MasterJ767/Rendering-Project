@@ -58,14 +58,14 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
 	pipeline = std::make_unique<Pipeline>(device, "simple_shader.vert.spv", "simple_shader.frag.spv", pipelineConfig);
 }
 
-void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
+void SimpleRenderSystem::render(FrameInfo& frameInfo) {
 	pipeline->bind(frameInfo.commandBuffer);
 
 	vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, & frameInfo.globalDescriptorSet, 0, nullptr);
 
 	for (auto& kv : frameInfo.gameObjects) {
 		auto& obj = kv.second;
-		if (obj.model == nullptr) continue;
+		if (obj.model == nullptr) { continue; }
 		SimplePushConstantData push{};
 		auto modelMatrix = obj.transform.mat4();
 		push.modelMatrix = modelMatrix;

@@ -1,3 +1,5 @@
 "E:/VulkanSDK/1.3.239.0/Bin/glslangValidator.exe" -V "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/simple_shader.vert" -o "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/simple_shader.vert.spv"
 "E:/VulkanSDK/1.3.239.0/Bin/glslangValidator.exe" -V "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/simple_shader.frag" -o "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/simple_shader.frag.spv"
+"E:/VulkanSDK/1.3.239.0/Bin/glslangValidator.exe" -V "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/point_light.frag" -o "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/point_light.frag.spv"
+"E:/VulkanSDK/1.3.239.0/Bin/glslangValidator.exe" -V "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/point_light.vert" -o "E:/Documents/New/(13) C++/Rendering-Project/Assets/Shaders/point_light.vert.spv"
 pause

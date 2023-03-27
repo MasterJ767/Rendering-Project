@@ -20,6 +20,10 @@ namespace Zenith {
 			glm::mat3 normalMatrix();
 		};
 
+		struct PointLightComponent {
+			float lightIntensity = 1.0f;
+		};
+
 		class GameObject {
 		public:
 			using id_t = unsigned int;
@@ -30,6 +34,8 @@ namespace Zenith {
 				return GameObject{ currentId++ };
 			}
 
+			static GameObject makePointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 colour = glm::vec3(1.0f));
+
 			GameObject(const GameObject&) = delete;
 			GameObject& operator=(const GameObject&) = delete;
 			GameObject(GameObject&&) = default;
@@ -37,9 +43,11 @@ namespace Zenith {
 
 			id_t getId() const { return id; }
 
-			std::shared_ptr<Model> model{};
 			glm::vec3 colour{};
 			TransformComponent transform{};
+
+			std::shared_ptr<Model> model{};
+			std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 		private:
 			GameObject(id_t rendId) : id{rendId} {}
