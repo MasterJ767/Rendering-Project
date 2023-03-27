@@ -6,6 +6,7 @@ set(PROJECT_NAME ZenithComponents)
 set(Header_Files
     "App.h"
 	"Camera.h"
+	"FrameInfo.h"
 	"GameObject.h"
 	"KeyboardMovement.h"
 	"Renderer.h"

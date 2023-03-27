@@ -4,6 +4,7 @@ set(PROJECT_NAME ZenithCore)
 # Source groups
 ################################################################################
 set(Header_Files
+	"Buffer.h"
 	"Device.h"
 	"Model.h"
 	"Pipeline.h"
@@ -14,6 +15,7 @@ set(Header_Files
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
+	"Buffer.cpp"
 	"Device.cpp"
 	"Model.cpp"
 	"Pipeline.cpp"

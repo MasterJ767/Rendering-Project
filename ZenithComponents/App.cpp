@@ -1,5 +1,6 @@
 #include "App.h"
 #include "Camera.h"
+#include "Buffer.h"
 #include "SimpleRenderSystem.h"
 #include "KeyboardMovement.h"
 
@@ -16,6 +17,13 @@ using namespace Zenith::Core;
 using namespace Zenith::Components;
 using namespace Zenith::Logic;
 
+namespace Zenith::Components {
+    struct GlobalUbo {
+        glm::mat4 projectionView{ 1.0f };
+        glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+    };
+}
+
 App::App() {
 	loadGameObjects();
 }
@@ -25,6 +33,12 @@ App::~App() {
 }
 
 void App::run() {
+    std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (int i = 0; i < uboBuffers.size(); ++i) {
+        uboBuffers[i] = std::make_unique<Buffer>(device, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        uboBuffers[i]->map();
+    }
+
 	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass() };
     Camera camera{};
     //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
@@ -49,8 +63,16 @@ void App::run() {
         camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 10.0f);
 		
 		if (auto commandBuffer = renderer.beginFrame()) {
+            int frameIndex = renderer.getFrameIndex();
+            FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera};
+
+            GlobalUbo ubo{};
+            ubo.projectionView = camera.getProjection() * camera.getView();
+            uboBuffers[frameIndex]->writeToBuffer(&ubo);
+            uboBuffers[frameIndex]->flush();
+
 			renderer.beginSwapChainRenderPass(commandBuffer);
-			simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+			simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
 			renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
@@ -61,10 +83,17 @@ void App::run() {
 
 void App::loadGameObjects() {
     std::shared_ptr<Model> model = Model::createModelFromFile(device, "flat_vase.obj");
+    std::shared_ptr<Model> model2 = Model::createModelFromFile(device, "smooth_vase.obj");
 
     auto gameObject = GameObject::createGameObject();
     gameObject.model = model;
-    gameObject.transform.translation = { 0.0f, 0.5f, 2.5f };
+    gameObject.transform.translation = { -1.0f, 0.5f, 2.5f };
     gameObject.transform.scale = glm::vec3(3.0f);
     gameObjects.push_back(std::move(gameObject));
+
+    auto gameObject2 = GameObject::createGameObject();
+    gameObject2.model = model2;
+    gameObject2.transform.translation = { 1.0f, 0.5f, 2.5f };
+    gameObject2.transform.scale = glm::vec3(3.0f);
+    gameObjects.push_back(std::move(gameObject2));
 }
