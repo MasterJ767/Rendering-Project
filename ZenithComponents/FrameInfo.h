@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "GameObject.h"
 
 #include <vulkan/vulkan.h>
 
@@ -12,6 +13,7 @@ namespace Zenith {
 			VkCommandBuffer commandBuffer;
 			Camera& camera;
 			VkDescriptorSet globalDescriptorSet;
+			GameObject::Map& gameObjects;
 		};
 	}
 }

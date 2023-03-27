@@ -20,7 +20,9 @@ using namespace Zenith::Logic;
 namespace Zenith::Components {
     struct GlobalUbo {
         alignas(16) glm::mat4 projectionView{ 1.0f };
-        alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+        alignas(16) glm::vec4 ambientLightColour{ 1.0f, 1.0f, 1.0f, 0.02f };
+        alignas(16) glm::vec3 lightPosition{ -1.0f };
+        alignas(16) glm::vec4 lightColor{ 1.0f };
     };
 }
 
@@ -44,7 +46,7 @@ void App::run() {
     }
 
     auto globalSetLayout = DescriptorSetLayout::Builder(device)
-        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
         .build();
 
     std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -57,10 +59,9 @@ void App::run() {
 
 	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
     Camera camera{};
-    //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
-    camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
     auto viewerObject = GameObject::createGameObject();
+    viewerObject.transform.translation.z = -2.5f;
     KeyboardMovement cameraController{};
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -76,11 +77,11 @@ void App::run() {
         camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
         float aspect = renderer.getAspectRatio();
-        camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 10.0f);
+        camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 100.0f);
 		
 		if (auto commandBuffer = renderer.beginFrame()) {
             int frameIndex = renderer.getFrameIndex();
-            FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
+            FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects};
 
             GlobalUbo ubo{};
             ubo.projectionView = camera.getProjection() * camera.getView();
@@ -88,7 +89,7 @@ void App::run() {
             uboBuffers[frameIndex]->flush();
 
 			renderer.beginSwapChainRenderPass(commandBuffer);
-			simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+			simpleRenderSystem.renderGameObjects(frameInfo);
 			renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
@@ -98,18 +99,25 @@ void App::run() {
 }
 
 void App::loadGameObjects() {
-    std::shared_ptr<Model> model = Model::createModelFromFile(device, "flat_vase.obj");
-    std::shared_ptr<Model> model2 = Model::createModelFromFile(device, "smooth_vase.obj");
+    std::shared_ptr<Model> flatVaseModel = Model::createModelFromFile(device, "flat_vase.obj");
+    std::shared_ptr<Model> smoothVaseModel = Model::createModelFromFile(device, "smooth_vase.obj");
+    std::shared_ptr<Model> quadModel = Model::createModelFromFile(device, "quad.obj");
 
     auto gameObject = GameObject::createGameObject();
-    gameObject.model = model;
-    gameObject.transform.translation = { -1.0f, 0.5f, 2.5f };
+    gameObject.model = flatVaseModel;
+    gameObject.transform.translation = { -1.0f, 0.5f, 0.0f };
     gameObject.transform.scale = glm::vec3(3.0f);
-    gameObjects.push_back(std::move(gameObject));
+    gameObjects.emplace(gameObject.getId(), std::move(gameObject));
 
     auto gameObject2 = GameObject::createGameObject();
-    gameObject2.model = model2;
-    gameObject2.transform.translation = { 1.0f, 0.5f, 2.5f };
+    gameObject2.model = smoothVaseModel;
+    gameObject2.transform.translation = { 1.0f, 0.5f, 0.0f };
     gameObject2.transform.scale = glm::vec3(3.0f);
-    gameObjects.push_back(std::move(gameObject2));
+    gameObjects.emplace(gameObject2.getId(), std::move(gameObject2));
+
+    auto gameObject3 = GameObject::createGameObject();
+    gameObject3.model = quadModel;
+    gameObject3.transform.translation = { 0.0f, 0.5f, 0.0f };
+    gameObject3.transform.scale = glm::vec3(3.0f);
+    gameObjects.emplace(gameObject3.getId(), std::move(gameObject3));
 }
