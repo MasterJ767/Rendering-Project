@@ -85,9 +85,11 @@ void App::run() {
             uboBuffers[frameIndex]->flush();
 
 			renderer.beginSwapChainRenderPass(commandBuffer);
+
 			simpleRenderSystem.render(frameInfo);
             pointLightSystem.render(frameInfo);
-			renderer.endSwapChainRenderPass(commandBuffer);
+			
+            renderer.endSwapChainRenderPass(commandBuffer);
 			renderer.endFrame();
 		}
 	}

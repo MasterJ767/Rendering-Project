@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <map>
 
 using namespace Zenith::Core;
 using namespace Zenith::Components;
@@ -54,6 +55,7 @@ void PointLightSystem::createPipeline(VkRenderPass renderPass) {
 
 	PipelineConfigInfo pipelineConfig{};
 	Pipeline::defaultPipelineConfigInfo(pipelineConfig);
+	Pipeline::enableAlphaBlending(pipelineConfig);
 	pipelineConfig.bindingDescriptions.clear();
 	pipelineConfig.attributeDescriptions.clear();
 	pipelineConfig.renderPass = renderPass;
@@ -81,13 +83,23 @@ void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo) {
 }
 
 void PointLightSystem::render(FrameInfo& frameInfo) {
-	pipeline->bind(frameInfo.commandBuffer);
-
-	vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
+	std::map<float, GameObject::id_t> sorted;
 
 	for (auto& kv : frameInfo.gameObjects) {
 		auto& obj = kv.second;
 		if (obj.pointLight == nullptr) { continue; }
+
+		auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+		float disSquared = glm::dot(offset, offset);
+		sorted[disSquared] = obj.getId();
+	}
+
+	pipeline->bind(frameInfo.commandBuffer);
+
+	vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
+
+	for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+		auto& obj = frameInfo.gameObjects.at(it->second);
 
 		PointLightPushConstantData push{};
 		push.position = glm::vec4(obj.transform.translation, 1.0f);

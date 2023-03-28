@@ -24,10 +24,12 @@ layout(push_constant) uniform Push {
     float radius;
 } push;
 
+const float M_PI = 3.1415926538;
+
 void main() {
     float dis = sqrt(dot(fragOffset, fragOffset));
     if (dis >= 1.0) {
         discard;
     }
-    outColour = vec4(push.colour.xyz, 1.0);
+    outColour = vec4(push.colour.xyz, 0.5 * (cos(dis * M_PI) + 1.0));
 }
