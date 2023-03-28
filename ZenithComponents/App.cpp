@@ -79,6 +79,7 @@ void App::run() {
             GlobalUbo ubo{};
             ubo.projectionMatrix = camera.getProjection();
             ubo.viewMatrix = camera.getView();
+            ubo.inverseViewMatrix = camera.getInverseView();
             pointLightSystem.update(frameInfo, ubo);
             uboBuffers[frameIndex]->writeToBuffer(&ubo);
             uboBuffers[frameIndex]->flush();
