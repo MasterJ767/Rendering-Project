@@ -1,4 +1,7 @@
 #include "GameObject.h"
+#include "Utils.h"
+
+#include <numeric>
 
 using namespace Zenith::Components;
 
@@ -60,11 +63,48 @@ glm::mat3 TransformComponent::normalMatrix() {
 	};
 }
 
-GameObject GameObject::makePointLight(float intensity, float radius, glm::vec3 colour) {
-	GameObject gameObject = createGameObject();
+GameObject& GameObjectManager::makePointLight(float intensity, float radius, glm::vec3 colour) {
+	GameObject& gameObject = createGameObject();
 	gameObject.colour = colour;
 	gameObject.transform.scale.x = radius;
 	gameObject.pointLight = std::make_unique<PointLightComponent>();
 	gameObject.pointLight->lightIntensity = intensity;
 	return gameObject;
+}
+
+GameObjectManager::GameObjectManager(Device& device) {
+	int alignment = std::lcm(
+		device.properties.limits.nonCoherentAtomSize,
+		device.properties.limits.minUniformBufferOffsetAlignment);
+	for (int i = 0; i < uboBuffers.size(); i++) {
+		uboBuffers[i] = std::make_unique<Buffer>(
+			device,
+			sizeof(GameObjectBufferData),
+			GameObjectManager::MAX_GAME_OBJECTS,
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			alignment);
+		uboBuffers[i]->map();
+	}
+
+	textureDefault = Texture::createTextureFromFile(device, Util::TEXTUREDIR + "checkerboard.png");
+}
+
+void GameObjectManager::updateBuffer(int frameIndex) {
+	for (auto& kv : gameObjects) {
+		auto& obj = kv.second;
+		GameObjectBufferData data{};
+		data.modelMatrix = obj.transform.mat4();
+		data.normalMatrix = obj.transform.normalMatrix();
+		uboBuffers[frameIndex]->writeToIndex(&data, kv.first);
+	}
+	uboBuffers[frameIndex]->flush();
+}
+
+VkDescriptorBufferInfo GameObject::getBufferInfo(int frameIndex) {
+	return gameObjectManager.getBufferInfoForGameObject(frameIndex, id);
+}
+
+GameObject::GameObject(id_t objId, const GameObjectManager& manager) : id{ objId }, gameObjectManager{ manager } {
+
 }

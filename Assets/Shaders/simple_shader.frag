@@ -1,8 +1,10 @@
 #version 450
+#extension GL_KHR_vulkan_glsl: enable
 
 layout(location = 0) in vec3 fragPosWorld;
 layout(location = 1) in vec3 fragColour;
 layout(location = 2) in vec3 fragNormalWorld;
+layout(location = 3) in vec2 fragUV;
 
 layout(location = 0) out vec4 outColour;
 
@@ -19,6 +21,8 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
     PointLight pointLights[10];
     int numLights;
 } ubo;
+
+layout(set = 1, binding = 1) uniform sampler2D diffuseMap;
 
 layout(push_constant) uniform Push {
     mat4 modelMatrix;
@@ -51,5 +55,7 @@ void main() {
         specularLight += intensity * blinnTerm;
     }
 
-    outColour = vec4(diffuseLight * fragColour + specularLight * fragColour, 1.0);
+    vec3 colour = texture(diffuseMap, fragUV).xyz;
+
+    outColour = vec4(diffuseLight * colour + specularLight * fragColour, 1.0);
 }

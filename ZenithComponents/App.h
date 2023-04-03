@@ -32,7 +32,8 @@ namespace Zenith {
 			Renderer renderer{ window, device };
 
 			std::unique_ptr<DescriptorPool> globalPool{};
-			GameObject::Map gameObjects;
+			std::vector<std::unique_ptr<DescriptorPool>> framePools;
+			GameObjectManager gameObjectManager{ device };
 		};
 	}
 }

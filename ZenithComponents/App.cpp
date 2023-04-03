@@ -4,6 +4,7 @@
 #include "SimpleRenderSystem.h"
 #include "PointLightSystem.h"
 #include "KeyboardMovement.h"
+#include "Utils.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -13,6 +14,8 @@
 #include <stdexcept>
 #include <array>
 #include <chrono>
+#include <iostream>
+#include <cassert>
 
 using namespace Zenith::Core;
 using namespace Zenith::Components;
@@ -23,6 +26,18 @@ App::App() {
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
+
+    framePools.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    auto framePoolBuilder = DescriptorPool::Builder(device)
+        .setMaxSets(1000)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
+        .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
+
+    for (int i = 0; i < framePools.size(); ++i) {
+        framePools[i] = framePoolBuilder.build();
+    }
+
 	loadGameObjects();
 }
 
@@ -49,11 +64,14 @@ void App::run() {
             .build(globalDescriptorSets[i]);
     }
 
+    std::cout << "Alignment: " << device.properties.limits.minUniformBufferOffsetAlignment << "\n";
+    std::cout << "atom size: " << device.properties.limits.nonCoherentAtomSize << "\n";
+
 	SimpleRenderSystem simpleRenderSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
     PointLightSystem pointLightSystem{ device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
     Camera camera{};
 
-    auto viewerObject = GameObject::createGameObject();
+    auto& viewerObject = gameObjectManager.createGameObject();
     viewerObject.transform.translation.z = -2.5f;
     KeyboardMovement cameraController{};
 
@@ -74,7 +92,8 @@ void App::run() {
 		
 		if (auto commandBuffer = renderer.beginFrame()) {
             int frameIndex = renderer.getFrameIndex();
-            FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects};
+            framePools[frameIndex]->resetPool();
+            FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], *framePools[frameIndex], gameObjectManager.gameObjects};
 
             GlobalUbo ubo{};
             ubo.projectionMatrix = camera.getProjection();
@@ -83,6 +102,8 @@ void App::run() {
             pointLightSystem.update(frameInfo, ubo);
             uboBuffers[frameIndex]->writeToBuffer(&ubo);
             uboBuffers[frameIndex]->flush();
+
+            gameObjectManager.updateBuffer(frameIndex);
 
 			renderer.beginSwapChainRenderPass(commandBuffer);
 
@@ -102,23 +123,23 @@ void App::loadGameObjects() {
     std::shared_ptr<Model> smoothVaseModel = Model::createModelFromFile(device, "smooth_vase.obj");
     std::shared_ptr<Model> quadModel = Model::createModelFromFile(device, "quad.obj");
 
-    auto gameObject = GameObject::createGameObject();
+    std::shared_ptr<Texture> checkerboardTexture = Texture::createTextureFromFile(device, Util::TEXTUREDIR + "checkerboard.png");
+
+    auto& gameObject = gameObjectManager.createGameObject();
     gameObject.model = flatVaseModel;
     gameObject.transform.translation = { -1.0f, 0.5f, 0.0f };
     gameObject.transform.scale = glm::vec3(3.0f);
-    gameObjects.emplace(gameObject.getId(), std::move(gameObject));
 
-    auto gameObject2 = GameObject::createGameObject();
+    auto& gameObject2 = gameObjectManager.createGameObject();
     gameObject2.model = smoothVaseModel;
     gameObject2.transform.translation = { 1.0f, 0.5f, 0.0f };
     gameObject2.transform.scale = glm::vec3(3.0f);
-    gameObjects.emplace(gameObject2.getId(), std::move(gameObject2));
 
-    auto gameObject3 = GameObject::createGameObject();
+    auto& gameObject3 = gameObjectManager.createGameObject();
     gameObject3.model = quadModel;
+    gameObject3.diffuseMap = checkerboardTexture;
     gameObject3.transform.translation = { 0.0f, 0.5f, 0.0f };
     gameObject3.transform.scale = glm::vec3(3.0f);
-    gameObjects.emplace(gameObject3.getId(), std::move(gameObject3));
 
     std::vector<glm::vec3> lightColours{
       {1.f, .1f, .1f},
@@ -130,10 +151,9 @@ void App::loadGameObjects() {
     };
 
     for (int i = 0; i < lightColours.size(); ++i) {
-        auto pointLight = GameObject::makePointLight(0.2f);
+        auto& pointLight = gameObjectManager.makePointLight(0.2f);
         pointLight.colour = lightColours[i];
         auto rotateLight = glm::rotate(glm::mat4(1.0f), (i * glm::two_pi<float>()) / lightColours.size(), { 0.0f, -1.0f, 0.0f });
         pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
-        gameObjects.emplace(pointLight.getId(), std::move(pointLight));
     }
 }

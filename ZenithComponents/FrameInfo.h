@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "GameObject.h"
+#include "Descriptor.h"
 
 #include <vulkan/vulkan.h>
 
@@ -29,6 +30,7 @@ namespace Zenith {
 			VkCommandBuffer commandBuffer;
 			Camera& camera;
 			VkDescriptorSet globalDescriptorSet;
+			DescriptorPool& frameDescriptorPool;
 			GameObject::Map& gameObjects;
 		};
 	}

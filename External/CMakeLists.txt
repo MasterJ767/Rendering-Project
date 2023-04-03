@@ -3,13 +3,19 @@ set(PROJECT_NAME External)
 ################################################################################
 # Source groups
 ################################################################################
-set(Tiny_Object_Loader
+set(STB_Files
+	"stb/stb_image.h"
+)
+source_group("stb" FILES ${STB_Files})
+
+set(Tiny_Object_Loader_Files
 	"tinyobjectloader/tiny_obj_loader.h"
 )
-source_group("Tiny Object Loader" FILES ${Tiny_Object_Loader})
+source_group("Tiny Object Loader" FILES ${Tiny_Object_Loader_Files})
 
 set(ALL_FILES
-    ${Tiny_Object_Loader}
+	${STB_Files}
+    ${Tiny_Object_Loader_Files}
 )
 
 set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)

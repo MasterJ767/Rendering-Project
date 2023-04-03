@@ -79,7 +79,11 @@ void Buffer::writeToIndex(void* data, int index) {
     writeToBuffer(data, instanceSize, index * alignmentSize);
 }
 
-VkResult Buffer::flushIndex(int index) { return flush(alignmentSize, index * alignmentSize); }
+VkResult Buffer::flushIndex(int index) { 
+    assert(alignmentSize % device.properties.limits.nonCoherentAtomSize == 0 && "Cannot use Buffer::flushIndex if alignmentSize isn't a multiple of Device Limits nonCoherentAtomSize");
+
+    return flush(alignmentSize, index * alignmentSize); 
+}
 
 VkDescriptorBufferInfo Buffer::descriptorInfoForIndex(int index) {
     return descriptorInfo(alignmentSize, index * alignmentSize);

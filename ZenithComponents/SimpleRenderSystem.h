@@ -30,6 +30,8 @@ namespace Zenith {
 
 			std::unique_ptr<Pipeline> pipeline;
 			VkPipelineLayout pipelineLayout;
+
+			std::unique_ptr<DescriptorSetLayout> renderSystemLayout;
 		};
 	}
 }
